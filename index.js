@@ -30,6 +30,15 @@ function clearLeds() {
     }
 }
 
+function clearGridMatrix(matrix){
+    for (let y = 0; y < 8; y++) {
+        matrix[y] = [];
+        for (let x = 0; x < 16; x++) {
+            matrix[y][x] = 0;
+        }
+    }
+}
+
 /**
  * App Variables
  */
@@ -50,10 +59,6 @@ app.use(express.static(path.join(__dirname, "public")));
  * Routes Definitions
  */
 
-app.get("/", (req, res) => {
-    res.render("index", { title: "Home" });
-});
-
 app.post("/api/grid/set_individual", (req, res) => {
     
     var x = Number(req.body.x);
@@ -72,14 +77,18 @@ app.post("/api/grid/set_individual", (req, res) => {
 app.post("/api/grid/set_grid", (req, res) => {
 
     let incomingGrid = req.body.grid;
-    let myGrid  = { ...led };
+    console.log(`incoming grid: ${incomingGrid}`);
+    let myGrid = { ...blankLed };
+    clearGridMatrix(myGrid);
+    // console.log('blank Grid');
+    // console.log(myGrid);
     incomingGrid.forEach(function(row, y) {
         for (var i = 0; i < row.length; i++) {
             myGrid[y][i] = Number(incomingGrid[y][i]) * 15;
         }
     });
-    console.log(myGrid)
-    console.log(`setting grid: ${myGrid}`);
+    console.log(`setting grid:`);
+    console.log(myGrid);
     grid.refresh(myGrid);
     res.send("set the grid");
 });
@@ -107,9 +116,14 @@ app.get("/example", (req,res) => {
 //     });
 // });
 
-app.get("/ind", (req, res) => {
+app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, '/index.html'));
 });
+
+// app.get("/", (req, res) => {
+//     res.render("index", { title: "Home" });
+// });
+
 
 /**
  * Server Activation

@@ -1,13 +1,13 @@
 <link rel="stylesheet" type="text/css" media="all" href="css/main.css">
 </link>
 
-<input type="text" onkeyup="updateGrid(this)"/>
+<input type="text" onkeyup="updateGridLetter(this)"/>
 <input id="x" type="number" />
 <input id="y" type="number" />
 <button onclick="updateGridXY()"> submit </button>
 
 <script>
- let grid = [];
+let grid = [];
 for (let y = 0; y < 8; y++) {
     grid[y] = [];
     for (let x = 0; x < 16; x++) {
@@ -80,7 +80,19 @@ function sendBitmapToGrid (bitmap) {
     });
 }
 
-function updateGrid(e) {
+function concateBitmaps(bitmap1, bitmap2) {
+    let newBitmap = []
+    let numOfRows = Math.max(bitmap1.length, bitmap2.length)
+
+    for (let y = 0; y < numOfRows; y++) {
+        bitmap1Row = bitmap1.length > y ? bitmap1[y] : '0'.repeat(bitmap1[0].length)
+        bitmap2Row = bitmap2.length > y ? bitmap2[y] : '0'.repeat(bitmap2[0].length)
+        newBitmap[y] = bitmap1Row + bitmap2Row
+    }
+    return newBitmap
+}
+
+function updateGridLetter(e) {
     clearGrid();
     let char = e.value;
     bitmap = chars[char].bitmap;
@@ -93,11 +105,65 @@ function updateGrid(e) {
             let fill = " "
             row[j] > 0 ? fill = "■" : fill = " ";
             mycel.innerHTML = fill;
-            // mycel.innerHTML = " ";
-            // mycel.innerHTML = "■";
         }
     }
 }
+
+function updateHTMLGrid(grid) {
+    for (let i = 0; i < grid.length; i++) {
+        let row = grid[i];
+        for (let j = 0; j < row.length; j++) {
+            myrow = mytablebody.getElementsByTagName("tr")[i];
+            mycel = myrow.getElementsByTagName("td")[j];
+            let fill = " "
+            row[j] > 0 ? fill = "■" : fill = " ";
+            mycel.innerHTML = fill;
+        }
+    }
+}
+
+function helloWorld() {
+    curCharIndex = 0;
+    let text = "Hello World!"
+     setInterval(() => {
+        curCharIndex = curCharIndex % text.length;
+        let curChar = text[curCharIndex];
+        console.log(`sending char: ${curChar}`);
+        let bitmap = chars[curChar].bitmap;
+        sendBitmapToGrid(bitmap);
+        curCharIndex++;
+    }, 500);
+}
+
+    function helloWord(word) {
+        curPlayheadIndex = 0;
+        let bigGrid = [[]]
+        let text = word.toString();
+        for (var i = 0; i < text.length; i++) {
+            let curChar = text[i];
+            let bitmap = chars[curChar].bitmap;
+            bigGrid = concateBitmaps(bigGrid, bitmap);
+        }
+        bigGrid = concateBitmaps(bigGrid, bigGrid);
+
+
+        setInterval(() => {
+            console.log(`current playhead at ${curPlayheadIndex}`);
+            let bitmap = [];
+            bigGrid.forEach(row => {
+                let substringRow = row.substring(curPlayheadIndex, curPlayheadIndex + 16);
+                bitmap.push(substringRow)
+            })
+            sendBitmapToGrid(bitmap);
+            updateHTMLGrid(bitmap);
+
+            curPlayheadIndex++;
+            curPlayheadIndex = curPlayheadIndex % parseInt(bigGrid[0].length/2);
+        }, 200);
+    }
+
+
+
 </script>
 
 <script src="js/characterOutput.js"></script>
