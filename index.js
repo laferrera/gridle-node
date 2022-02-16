@@ -8,6 +8,8 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require('body-parser');
 const monomeGrid = require('monome-grid');
+const abletonlink = require('abletonlink');
+const link = new abletonlink();
 const res = require("express/lib/response");
 let grid;
 // let grid = monomeGrid();
@@ -147,6 +149,14 @@ async function run() {
 }
 
 run();
+link.startUpdate(600, (beat, phase, bpm) => {
+    console.log("updated: ", beat, phase, bpm);
+    var numPeers = link.getNumPeers();
+    console.log("numPeers: ", numPeers);
+    console.log("setting tempo to 88");
+    link.bpm = 88;
+});
+
 app.listen(port, () => {
     console.log(`Listening to requests on http://localhost:${port}`);
 });
